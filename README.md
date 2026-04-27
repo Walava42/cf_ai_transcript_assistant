@@ -1,5 +1,3 @@
-<img width="2024" height="1185" alt="image" src="https://github.com/user-attachments/assets/80aaf04e-3648-4223-971f-b60231ad4eef" /># 🧠 AI Concept Decoder & Flashcard Generator
-
 An AI-powered, full-stack serverless application designed to help students and developers break down complex academic texts, dense technical documentation, or lecture excerpts into simple summaries and study flashcards.
 
 Built exclusively on the **Cloudflare Developer Platform** for a lightning-fast, edge-computed experience.
