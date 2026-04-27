@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Transcript Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class' }
+    </script>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen p-8 font-sans">
+    <div class="max-w-3xl mx-auto">
+        
+        <header class="mb-10 text-center">
+            <h1 class="text-4xl font-bold bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
+                Study Notes Generator
+            </h1>
+            <p class="text-gray-400 mt-2">Powered by Cloudflare Workers AI & Llama 3.3</p>
+        </header>
+
+        <main class="bg-gray-800 rounded-xl p-6 shadow-xl border border-gray-700">
+            <label for="transcript" class="block text-sm font-medium text-gray-300 mb-2">
+                Paste your raw class transcript here:
+            </label>
+            <textarea id="transcript" rows="6" 
+                class="w-full bg-gray-900 text-gray-100 border border-gray-600 rounded-lg p-4 focus:ring-2 focus:ring-orange-500 focus:outline-none placeholder-gray-500"
+                placeholder="Paste a complex paragraph from an academic paper, a dense technical definition, or a short lecture excerpt here..."></textarea>
+            
+            <button id="generateBtn" 
+                class="mt-4 w-full bg-orange-600 hover:bg-orange-500 text-white font-bold py-3 px-4 rounded-lg transition-all flex justify-center items-center">
+                <span id="btnText">Generate Study Notes</span>
+                <svg id="loader" class="hidden animate-spin ml-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            </button>
+        </main>
+
+        <div id="results" class="hidden mt-8 space-y-6">
+            <div class="bg-gray-800 rounded-xl p-6 shadow-xl border border-gray-700">
+                <h2 class="text-2xl font-bold text-orange-400 mb-4">Summary</h2>
+                <p id="summaryText" class="text-gray-300 leading-relaxed"></p>
+            </div>
+
+            <div class="bg-gray-800 rounded-xl p-6 shadow-xl border border-gray-700">
+                <h2 class="text-2xl font-bold text-orange-400 mb-4">Flashcards</h2>
+                <div id="flashcardsContainer" class="grid gap-4">
+                    </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('generateBtn').addEventListener('click', async () => {
+            const text = document.getElementById('transcript').value;
+            if (!text.trim()) return alert("Please enter some text!");
+
+            // Modify the UI while loading
+            const btnText = document.getElementById('btnText');
+            const loader = document.getElementById('loader');
+            const resultsDiv = document.getElementById('results');
+            
+            btnText.innerText = "Analyzing transcript...";
+            loader.classList.remove('hidden');
+            resultsDiv.classList.add('hidden');
+
+            try {
+                // Here you make the request to the Worker that you have running locally
+                const response = await fetch('http://localhost:8787', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Paint the summary
+                    document.getElementById('summaryText').innerText = result.data.summary;
+                    
+                    // Paint the flashcards
+                    const flashcardsHTML = result.data.flashcards.map((card, index) => `
+                        <div class="bg-gray-900 border border-gray-700 p-4 rounded-lg">
+                            <p class="font-bold text-gray-100 mb-2">Q: ${card.q}</p>
+                            <p class="text-gray-400">A: ${card.a}</p>
+                        </div>
+                    `).join('');
+                    
+                    document.getElementById('flashcardsContainer').innerHTML = flashcardsHTML;
+                    resultsDiv.classList.remove('hidden');
+                } else {
+                    alert("Error: " + result.error);
+                }
+            } catch (error) {
+                alert("Failed to connect to the server. Is Wrangler running?");
+            } finally {
+                // Restore the UI
+                btnText.innerText = "Generate Study Notes";
+                loader.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

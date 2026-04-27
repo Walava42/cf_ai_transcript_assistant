@@ -1,0 +1,8 @@
+DROP TABLE IF EXISTS notes;
+CREATE TABLE IF NOT EXISTS notes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+  original_text TEXT,
+  summary TEXT,
+  flashcards TEXT
+);
